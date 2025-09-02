@@ -2,8 +2,10 @@ package main
 
 // load required packages
 import (
+	"dpenha/rbac-go/controller"
 	"dpenha/rbac-go/database"
 	"dpenha/rbac-go/model"
+	"dpenha/rbac-go/util"
 	"fmt"
 	"log"
 	"os"
@@ -50,6 +52,19 @@ func seedData() {
 // start the server on port 8000
 func serveApplication() {
 	router := gin.Default()
+
+	authRoutes := router.Group("/auth/user")
+	authRoutes.POST("/register", controller.Register)
+	authRoutes.POST("/login", controller.Login)
+
+	adminRoutes := router.Group("/admin")
+	adminRoutes.Use(util.JWTAuth())
+	adminRoutes.GET("/users", controller.GetUsers)
+	adminRoutes.GET("/user/:id", controller.GetUser)
+	adminRoutes.PUT("/user/:id", controller.UpdateUser)
+	adminRoutes.POST("/user/role", controller.CreateRole)
+	adminRoutes.GET("/user/roles", controller.GetRoles)
+	adminRoutes.PUT("/user/role/:id", controller.UpdateRole)
 
 	router.Run(":8000")
 	fmt.Println("Server running on port 8000")
